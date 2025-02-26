@@ -31,6 +31,7 @@
 #include <cstring>
 #include <initializer_list>
 #include <memory>
+#include <dlfcn.h>
 
 #define LOG_TAG "native-activity"
 
@@ -387,9 +388,31 @@ int OnSensorEvent(int /* fd */, int /* events */, void* data) {
  * android_native_app_glue.  It runs in its own thread, with its own
  * event loop for receiving input events and doing other things.
  */
-void android_main(android_app* state) {
-  Engine engine {};
+void android_main(android_app* state) 
+{
 
+#ifdef NDK_SANITIZER
+  void* handle = dlopen(NDK_SANITIZER, RTLD_NOW | RTLD_GLOBAL);
+  if (!handle) {
+      LOGE("Failed to load Sanatizer: %s", dlerror());
+  } else {
+      LOGI("Succesfully loaded Sanatizer");
+  }
+#endif
+
+  // Trigger Undefined Behavior Sanatizer
+  int k = 0x7fffffff;
+  k += 1;
+
+  LOGI("Overflow, undefined behavior : %d", k);
+
+  // Trigger Address Sanatizer
+  int* foo = new int;
+  *foo = 3;
+  delete foo;
+  *foo = 4;
+
+  Engine engine {};
   memset(&engine, 0, sizeof(engine));
   state->userData = &engine;
   state->onAppCmd = engine_handle_cmd;

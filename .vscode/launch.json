@@ -9,32 +9,18 @@
             "target": "select",
             "mode": "native",
 
-            "apkPath": "${workspaceFolder}/app/build/outputs/apk/debug/app-debug.apk",
+            "apkPath": "${workspaceFolder}/app/build/outputs/apk/${input:buildType}/app-${input:buildType}.apk",
             "launchActivity": "android.app.NativeActivity",
             "resumeProcess": true,
 
             "native": {
-                "abiSupported": ["armeabi-v7a", "arm64-v8a", "x86", "x86_64"],
-
-                // Map of ABI to custom string. To be used with ${command:mappedAbi}.
-                // This can be useful if you have custom build system and the location of SO files uses custom strings for ABIs.
-                // Defaults to `android-debug.abiMap` configuration if available.
-                "abiMap": {
-                    "armeabi-v7a": "arm",
-                    "arm64-v8a": "arm64",
-                    "x86": "x86",
-                    "x86_64": "x64",
-                },
-        
-                // ABI to use for the current debug session.
-                // This can be set to one of the ABIs directly, or to `select` to show a picker.
-                "abi": "select",
+                "abi": "arm64-v8a",
                 "symbolSearchPaths": [
                     "${workspaceFolder}/app/build/intermediates/merged_native_libs/debug/mergeDebugNativeLibs/out/lib/${command:abi}/",
                 ]
                 
             },
-            "preLaunchTask": "Build Debug APK"
+            "preLaunchTask": "Build APK ${input:buildType}"
         },
         {
             "name": "Android Launch",
@@ -44,26 +30,14 @@
             "target": "select",
             "mode": "native",
 
-            "apkPath": "${workspaceFolder}/app/build/outputs/apk/debug/app-debug.apk",
+            "apkPath": "${workspaceFolder}/app/build/outputs/apk/${input:buildType}/app-${input:buildType}.apk",
             "launchActivity": "android.app.NativeActivity",
             "resumeProcess": true,
 
             "native": {
-                "abiSupported": ["armeabi-v7a", "arm64-v8a", "x86", "x86_64"],
-
-                // Map of ABI to custom string. To be used with ${command:mappedAbi}.
-                // This can be useful if you have custom build system and the location of SO files uses custom strings for ABIs.
-                // Defaults to `android-debug.abiMap` configuration if available.
-                "abiMap": {
-                    "armeabi-v7a": "arm",
-                    "arm64-v8a": "arm64",
-                    "x86": "x86",
-                    "x86_64": "x64",
-                },
-        
                 // ABI to use for the current debug session.
                 // This can be set to one of the ABIs directly, or to `select` to show a picker.
-                "abi": "select",
+                "abi": "arm64-v8a",
                 "symbolSearchPaths": [
                     "${workspaceFolder}/app/build/intermediates/merged_native_libs/debug/mergeDebugNativeLibs/out/lib/${command:abi}/",
                 ]
@@ -97,6 +71,21 @@
                     "${workspaceFolder}/app/build/intermediates/merged_native_libs/debug/mergeDebugNativeLibs/out/lib/${command:abi}/",
                 ]
             },
+        }
+    ],
+    "inputs": [
+        {
+            "id": "buildType",
+            "type": "pickString",
+            "description": "Choose Build Type",
+            "options": [
+                "debug",
+                "release",
+                "asan",
+                "hwasan",
+                "ubsan"
+            ],
+            "default": "debug"
         }
     ]
 }

@@ -2,17 +2,44 @@
 	"version": "2.0.0",
 	"tasks": [
 		{
-			"label": "Build Debug APK",
+			"label": "Build APK debug",
 			"type": "shell",
 			"command": "gradle assembleDebug",
 			"options": {
 				"cwd": "${workspaceFolder}/app"
-			},
-			"group": "build",
-      		"presentation": {
-        		"reveal": "always",
-        		"panel": "new"
-      		}
+			}
+		},
+		{
+			"label": "Build APK release",
+			"type": "shell",
+			"command": "gradle assembleRelease",
+			"options": {
+				"cwd": "${workspaceFolder}/app"
+			}
+		},
+		{
+			"label": "Build APK asan",
+			"type": "shell",
+			"command": "gradle assembleAsan",
+			"options": {
+				"cwd": "${workspaceFolder}/app"
+			}
+		},
+		{
+			"label": "Build APK hwasan",
+			"type": "shell",
+			"command": "gradle assembleHwasan",
+			"options": {
+				"cwd": "${workspaceFolder}/app"
+			}
+		},
+		{
+			"label": "Build APK ubsan",
+			"type": "shell",
+			"command": "gradle assembleUbsan",
+			"options": {
+				"cwd": "${workspaceFolder}/app"
+			}
 		}
 	]
 }

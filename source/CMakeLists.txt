@@ -18,6 +18,7 @@ cmake_minimum_required(VERSION 3.22.1)
 
 # build native_app_glue as a static lib
 set(${CMAKE_C_FLAGS}, "${CMAKE_C_FLAGS}")
+
 add_library(native_app_glue STATIC
     ${ANDROID_NDK}/sources/android/native_app_glue/android_native_app_glue.c)
 
@@ -30,13 +31,13 @@ set(CMAKE_CXX_FLAGS_DEBUG "-g2 -gdwarf-2")
 set(CMAKE_SHARED_LINKER_FLAGS
     "${CMAKE_SHARED_LINKER_FLAGS} -u ANativeActivity_onCreate")
 
-add_library(native-activity SHARED main.cpp)
+add_library(${DEPLOY_PROJECT} SHARED main.cpp)
 
-target_include_directories(native-activity PRIVATE
+target_include_directories(${DEPLOY_PROJECT} PRIVATE
     ${ANDROID_NDK}/sources/android/native_app_glue)
 
 # add lib dependencies
-target_link_libraries(native-activity
+target_link_libraries(${DEPLOY_PROJECT}
     android
     native_app_glue
     EGL
