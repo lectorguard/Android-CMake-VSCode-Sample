@@ -1,0 +1,124 @@
+plugins {
+    id "com.android.application"
+}
+
+// Caution: If you add any Java or Kotlin code to this project, or if you add
+// any dependencies which themselves use Java/Kotlin, you'll need to remove
+// `android:hasCode` from main/AndroidManifest.xml.
+
+android {
+    namespace 'com.example.native_activity'
+
+    defaultConfig {
+        applicationId = 'com.example.native_activity'
+        compileSdkVersion 35
+        ndkVersion '27.0.12077973'
+        // This is the minimum required for using Choreographer directly from the NDK. If you need
+        // to use a lower minSdkVersion, you must use the Java Choreographer API via JNI.
+        minSdkVersion 24
+        externalNativeBuild {
+            cmake {
+                arguments '-DANDROID_STL=c++_shared'
+                version "3.22.1"
+            }
+        }
+    }
+
+    signingConfigs {
+        release {
+            storeFile file("release.keystore")
+            storePassword "password"
+            keyAlias "release"
+            keyPassword "password"
+        }
+    }
+    
+    buildTypes {
+        debug {
+            minifyEnabled false 
+            debuggable true
+            jniDebuggable true
+            ndk.debugSymbolLevel = 'FULL'
+        }
+
+        release {
+            minifyEnabled true
+            signingConfig signingConfigs.release
+        }
+
+        ubsan {
+            initWith debug
+            externalNativeBuild {
+                cmake {
+                    arguments "-DANDROID_STL=c++_shared", "-DSANITIZE=ubsan"
+                }
+            }
+            ndk {
+                abiFilters "arm64-v8a"
+            }
+        }
+
+        asan {
+            initWith debug
+            packagingOptions {
+                jniLibs {
+                    // Needed for wrap.sh.
+                    useLegacyPackaging true
+                }
+            }
+            externalNativeBuild {
+                cmake {
+                    arguments "-DANDROID_STL=c++_shared", "-DSANITIZE=asan"
+                }
+            }
+            ndk {
+                abiFilters "arm64-v8a"
+            }
+        }
+
+        hwasan {
+            initWith debug
+            packagingOptions {
+                jniLibs {
+                    // Needed for wrap.sh.
+                    useLegacyPackaging = true
+                }
+            }
+            externalNativeBuild {
+                cmake {
+                    arguments "-DANDROID_STL=c++_shared", "-DSANITIZE=hwasan"
+                }
+            }
+            ndk {
+                abiFilters "arm64-v8a"
+            }
+        }
+    }
+
+    externalNativeBuild {
+        cmake {
+            path 'src/main/cpp/CMakeLists.txt'
+        }
+    }
+
+    // Asan and HWasan require wrap.sh
+    // Copy wrap.sh from NDK into project
+    // Code must execute preBuild, such that wrap.sh is copied to apk lib folder
+    applicationVariants.all { variant ->
+        if (variant.buildType.name == "asan" || variant.buildType.name == "hwasan") {
+            // Unique task name per variant (optional but recommended)
+            def copyWrapTask = tasks.register("copyWrapFor${variant.name.capitalize()}", Copy) {
+                doNotTrackState("Ignore")
+                from "${android.ndkDirectory}/wrap.sh/${variant.buildType.name}.sh" // NDK wrap.sh path
+                into "src/${variant.buildType.name}/resources/lib/arm64-v8a"    // Project destination
+                rename { "wrap.sh" }
+            }
+
+            // Ensure the copy task runs before the variant's preBuild task
+            variant.preBuildProvider.configure {
+                it.dependsOn(copyWrapTask)
+            }
+        }
+    }
+
+}
